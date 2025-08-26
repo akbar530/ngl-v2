@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NGLV2⚡</title>
+  <style>
+  .footerText {
+  margin-top: 20px;
+  font-size: 14px;
+  text-align: center;
+  color: #0ff;
+  text-shadow: 0 0 5px #0ff, 0 0 15px #80f;
+  animation: glowFooter 2s ease-in-out infinite alternate;
+}
+
+@keyframes glowFooter {
+  from { opacity: 0.6; }
+  to   { opacity: 1; }
+}
+  
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    /* Loading screen */
+    #loadingScreen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 9999;
+      opacity: 1;
+      transition: opacity 1s ease;
+    }
+    #loadingScreen.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .loader {
+      border: 5px solid rgba(255,255,255,0.2);
+      border-top: 5px solid #0ff;
+      border-right: 5px solid #80f;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+    .loadingText {
+      font-size: 20px;
+      font-weight: bold;
+      color: #0ff;
+      text-shadow: 0 0 8px #0ff, 0 0 15px #80f;
+      animation: glow 1.5s ease-in-out infinite alternate;
+    }
+    @keyframes glow {
+      from { opacity: 0.5; }
+      to { opacity: 1; }
+    }
+
+    /* Background */
+    #bgImage {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+      filter: brightness(0.6);
+    }
+
+    /* Partikel biru & ungu */
+    .particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      opacity: 0.6;
+      animation: floatUp 10s linear infinite;
+      z-index: -1;
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(100vh) scale(0.3); opacity: 0; }
+      30% { opacity: 1; }
+      100% { transform: translateY(-20vh) scale(1); opacity: 0; }
+    }
+
+    /* Container shape */
+    .container {
+      background: rgba(0, 0, 50, 0.4);
+      backdrop-filter: blur(15px);
+      padding: 35px;
+      border-radius: 20px;
+      border: 2px solid rgb(0,123,255);
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      z-index: 5;
+      position: relative;
+      overflow: hidden;
+
+      opacity: 0;
+      transform: translateY(50px);
+      animation: fadeUp 1s ease forwards;
+      animation-delay: 0.3s;
+    }
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* Border glowing animasi */
+    .container::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: 20px;
+      padding: 2px;
+      background: linear-gradient(120deg, #00f, #0ff, #80f, #f0f, #00f);
+      background-size: 400% 400%;
+      animation: borderAnim 8s linear infinite;
+      -webkit-mask: 
+        linear-gradient(#000 0 0) content-box, 
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+              mask-composite: exclude;
+    }
+    @keyframes borderAnim {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    h2 {
+      font-size: 26px;
+      margin-bottom: 25px;
+      font-weight: bold;
+      color: rgb(0,180,255);
+      text-shadow: 0 0 8px rgba(0,180,255,0.8);
+      opacity: 0;
+      animation: fadeIn 1s ease forwards 0.3s;
+    }
+    @keyframes fadeIn { to { opacity: 1; } }
+
+    /* Input group */
+    .form-group {
+      position: relative;
+      margin: 20px 0;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeSlide 0.8s ease forwards;
+    }
+    .form-group:nth-child(2) { animation-delay: 0.6s; }
+    .form-group:nth-child(3) { animation-delay: 0.9s; }
+    @keyframes fadeSlide { to { opacity: 1; transform: translateY(0); } }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      border: 2px solid rgba(0,123,255,0.5);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+      padding: 14px 16px;
+      line-height: 1.6em;
+      text-indent: 4px;
+      box-sizing: border-box;
+      transition: 0.3s;
+    }
+    .form-group textarea {
+      resize: none;
+      height: 120px;
+      padding-top: 16px;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: rgb(0,180,255);
+      box-shadow: 0 0 10px rgba(0,180,255,0.7);
+    }
+    .form-group label {
+      position: absolute;
+      left: 16px;
+      top: 14px;
+      color: #bbb;
+      font-size: 14px;
+      pointer-events: none;
+      transition: 0.3s;
+    }
+    .form-group label.hide {
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: 0.3s ease;
+}
+    .form-group input:focus + label,
+    .form-group textarea:focus + label,
+    .form-group input.filled + label,
+    .form-group textarea.filled + label {
+      top: -12px;
+      left: 12px;
+      font-size: 12px;
+      color: rgb(0,180,255);
+      background: rgba(0,0,50,0.6);
+      padding: 0 6px;
+      border-radius: 4px;
+    }
+
+    /* Button */
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #0080ff, #8000ff);
+      color: #fff;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 0 15px rgba(0,123,255,0.6);
+
+      opacity: 0;
+      transform: scale(0.9);
+      animation: btnAnim 0.8s ease forwards 1.2s;
+      position: relative;
+    }
+    @keyframes btnAnim {
+      to { opacity: 1; transform: scale(1); }
+    }
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 35px rgba(128,0,255,0.9);
+    }
+    /* Spinner loading */
+    .spinner {
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top: 3px solid #fff;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    /* Modal umum */
+    .modal {
+      display: none; 
+      position: fixed; 
+      z-index: 99999; 
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(5px);
+      justify-content: center; 
+      align-items: center;
+      animation: fadeIn 0.4s ease;
+    }
+    .modal-content {
+      padding: 25px;
+      border-radius: 18px;
+      text-align: center;
+      max-width: 350px;
+      width: 80%;
+      color: #fff;
+      animation: popUp 0.5s ease;
+    }
+    @keyframes popUp {
+      from { transform: scale(0.7); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-content button {
+      margin-top: 15px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    /* Modal sukses */
+    #successModal .modal-content {
+      background: rgba(0, 0, 50, 0.9);
+      border: 2px solid #0ff;
+      box-shadow: 0 0 25px #80f;
+    }
+    #successModal .modal-content h3 {
+      color: #0ff;
+      text-shadow: 0 0 8px #0ff, 0 0 12px #80f;
+    }
+    #successModal .modal-content button {
+      background: linear-gradient(135deg, #00f, #80f);
+      color: #fff;
+    }
+    #successModal .modal-content button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 25px #0ff;
+    }
+    /* Modal gagal */
+    #errorModal .modal-content {
+      background: rgba(50, 0, 0, 0.9);
+      border: 2px solid #f00;
+      box-shadow: 0 0 25px #f33;
+    }
+    #errorModal .modal-content h3 {
+      color: #f33;
+      text-shadow: 0 0 8px #f00, 0 0 12px #f55;
+    }
+    #errorModal .modal-content button {
+      background: linear-gradient(135deg, #a00, #f33);
+      color: #fff;
+    }
+    #errorModal .modal-content button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 25px #f00;
+    }
+    /* Efek shake modal gagal */
+    .shakeModal {
+      animation: shake 0.5s;
+    }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      50% { transform: translateX(8px); }
+      75% { transform: translateX(-8px); }
+      100% { transform: translateX(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading screen -->
+  <div id="loadingScreen">
+    <div class="loader"></div>
+    <div class="loadingText">Loading...</div>
+  </div>
+
+  <!-- Background -->
+  <img id="bgImage" src="bg.jpg" alt="background">
+
+  <!-- Partikel -->
+  <script>
+    for(let i=0;i<35;i++){
+      let p=document.createElement("div");
+      p.className="particle";
+      let warna = Math.random() > 0.5 ? "rgba(0,150,255,0.9)" : "rgba(180,0,255,0.9)";
+      p.style.background=warna;
+      p.style.boxShadow="0 0 12px "+warna;
+      p.style.left=Math.random()*100+"vw";
+      p.style.animationDuration= (6+Math.random()*10)+"s";
+      p.style.animationDelay= (Math.random()*5)+"s";
+      document.body.appendChild(p);
+    }
+  </script>
+
+  <div class="container" id="mainContent" style="display:none;">
+    <h2>⚡ KIRIM PESAN ANONIM ⚡</h2>
+    
+    <div class="form-group">
+      <input type="text" id="nama">
+      <label for="nama" id="labelNama"></label>
+    </div>
+
+    <div class="form-group">
+      <textarea id="pesan"></textarea>
+      <label for="pesan" id="labelPesan"></label>
+    </div>
+
+    <button onclick="kirimPesan()" id="btnKirim">🚀 KIRIM SEKARANG</button>
+    
+    <p class="footerText">"Allah's plane are better than your dreams and in every situation,just say Alhamdulillah"</p>
+    <h4>-Zero KW</h4>
+  </div>
+  
+  <!-- Modal sukses -->
+  <div id="successModal" class="modal">
+    <div class="modal-content">
+      <h3>✅ Pesan Terkirim!</h3>
+      <p>Pesan lo udah nyampe bro 🚀</p>
+      <button onclick="closeModal('successModal')">Tutup</button>
+    </div>
+  </div>
+
+  <!-- Modal gagal -->
+  <div id="errorModal" class="modal">
+    <div class="modal-content" id="errorContent">
+      <h3>❌ Gagal Ngirim!</h3>
+      <p>Ada masalah, coba lagi nanti ⚠️</p>
+      <button onclick="closeModal('errorModal')">Tutup</button>
+    </div>
+  </div>
+
+  <!-- Suara -->
+  <audio id="sClick" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
+  <audio id="sSuccess" src="https://assets.mixkit.co/active_storage/sfx/2011/2011-preview.mp3"></audio>
+  <audio id="sError" src="https://assets.mixkit.co/active_storage/sfx/2012/2012-preview.mp3"></audio>
+  <audio id="sHover" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+  <audio id="sIntro" src="https://assets.mixkit.co/active_storage/sfx/2866/2866-preview.mp3"></audio>
+
+  <script>
+    const BOT_TOKEN = "7333991546:AAGOJ-qm-520_4FyZX1TV1b_7H3L9dzXyGI"; 
+    const CHAT_ID = "7378003525"; 
+    const btn = document.getElementById("btnKirim");
+
+    const sClick = document.getElementById("sClick");
+    const sSuccess = document.getElementById("sSuccess");
+    const sError = document.getElementById("sError");
+    const sHover = document.getElementById("sHover");
+    const sIntro = document.getElementById("sIntro");
+
+    // loading screen
+    window.addEventListener("load", ()=>{
+      setTimeout(()=>{
+        document.getElementById("loadingScreen").classList.add("hide");
+        setTimeout(()=>{
+          document.getElementById("loadingScreen").style.display="none";
+          document.getElementById("mainContent").style.display="block";
+          sIntro.play();
+        }, 1000);
+      }, 1500);
+    });
+
+    // typing effect label
+    function typingEffect(el, text, speed){
+      let i=0;
+      function type(){
+        if(i<text.length){
+          el.innerHTML+=text.charAt(i);
+          i++;
+          setTimeout(type,speed);
+        }
+      }
+      type();
+    }
+    typingEffect(document.getElementById("labelNama"), "", 40);
+    typingEffect(document.getElementById("labelPesan"), "", 40);
+    // typing effect label
+function typingEffect(el, text, speed){
+  let i=0;
+  function type(){
+    if(i<text.length){
+      el.innerHTML+=text.charAt(i);
+      i++;
+      setTimeout(type,speed);
+    }
+  }
+  type();
+}
+typingEffect(document.getElementById("labelNama"), "Nama lo (opsional)", 40);
+typingEffect(document.getElementById("labelPesan"), "Tulis pesan lo di sini...", 40);
+
+// hide label saat user ngetik
+document.querySelectorAll(".form-group input, .form-group textarea").forEach(el=>{
+  el.addEventListener("input",()=>{
+    let label = el.nextElementSibling;
+    if(el.value.trim() !== ""){
+      label.classList.add("hide");
+    } else {
+      label.classList.remove("hide");
+    }
+  });
+});
+    // hover sound
+    btn.addEventListener("mouseenter", ()=>{ sHover.play(); });
+
+    // modal
+    function openModal(id) {
+      document.getElementById(id).style.display = "flex";
+      if(id === "errorModal"){
+        const errorBox = document.getElementById("errorContent");
+        errorBox.classList.add("shakeModal");
+        setTimeout(()=> errorBox.classList.remove("shakeModal"),600);
+      }
+    }
+    function closeModal(id) {
+      document.getElementById(id).style.display = "none";
+    }
+
+    function kirimPesan() {
+      const nama = document.getElementById("nama").value.trim();
+      const pesan = document.getElementById("pesan").value.trim();
+
+      if (!pesan) {
+        sError.play();
+        openModal("errorModal");
+        return;
+      }
+
+      sClick.play();
+      btn.innerHTML = '<span class="spinner"></span>Ngirim...';
+      const teks = `💬 Pesan Anonim:\n\n📨 ${pesan}\n👤 Dari: ${nama || "Anonim"}`;
+
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: CHAT_ID, text: teks })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok) {
+          sSuccess.play();
+          document.getElementById("pesan").value = "";
+          document.getElementById("nama").value = "";
+          openModal("successModal");
+        } else {
+          sError.play();
+          openModal("errorModal");
+        }
+        btn.innerText = "🚀 KIRIM SEKARANG";
+      })
+      .catch(() => {
+        sError.play();
+        openModal("errorModal");
+        btn.innerText = "🚀 KIRIM SEKARANG";
+      });
+    }
+  </script>
+
+</body>
+</html>
