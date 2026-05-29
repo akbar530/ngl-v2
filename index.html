@@ -3,536 +3,697 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>NGLV2⚡</title>
+  <title>DEREN NGL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap" rel="stylesheet">
   <style>
-  .footerText {
-  margin-top: 20px;
-  font-size: 14px;
-  text-align: center;
-  color: #0ff;
-  text-shadow: 0 0 5px #0ff, 0 0 15px #80f;
-  animation: glowFooter 2s ease-in-out infinite alternate;
-}
+    :root {
+      --sky:    #87CEEB;
+      --sky2:   #5BB8F5;
+      --sky3:   #3AA0E8;
+      --skylt:  #C8E9F8;
+      --skyvlt: #E8F6FD;
+      --white:  #FFFFFF;
+      --dark:   #1A4A6B;
+      --mid:    #2A6FA8;
+      --soft:   #5BAADB;
+      --pixel:  2px;
+    }
 
-@keyframes glowFooter {
-  from { opacity: 0.6; }
-  to   { opacity: 1; }
-}
-  
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Press Start 2P', monospace;
+      image-rendering: pixelated;
+    }
+
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      height: 100vh;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      background: #000;
-      color: #fff;
+      background: var(--skylt);
       overflow: hidden;
+      position: relative;
     }
 
-    /* Loading screen */
+    /* ── Background ── */
+    .bg-img {
+      position: fixed;
+      inset: 0;
+      background: url('https://files.catbox.moe/2piidj.jpg') center/cover no-repeat;
+      z-index: -3;
+      image-rendering: pixelated;
+    }
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(200, 233, 248, 0.72);
+      z-index: -2;
+    }
+
+    /* ── Pixel clouds floating ── */
+    .cloud {
+      position: fixed;
+      background: white;
+      opacity: 0.55;
+      z-index: -1;
+      image-rendering: pixelated;
+      animation: cloudFloat linear infinite;
+    }
+    @keyframes cloudFloat {
+      from { transform: translateX(-200px); }
+      to   { transform: translateX(110vw); }
+    }
+
+    /* ── Loading Screen ── */
     #loadingScreen {
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: #000;
+      inset: 0;
+      background: var(--skylt);
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      flex-direction: column;
+      gap: 24px;
       z-index: 9999;
-      opacity: 1;
-      transition: opacity 1s ease;
+      transition: opacity 0.5s ease;
     }
-    #loadingScreen.hide {
-      opacity: 0;
-      pointer-events: none;
+    #loadingScreen.hide { opacity: 0; pointer-events: none; }
+
+    .px-loader {
+      display: grid;
+      grid-template-columns: repeat(3, 14px);
+      grid-template-rows: repeat(3, 14px);
+      gap: 4px;
     }
-    .loader {
-      border: 5px solid rgba(255,255,255,0.2);
-      border-top: 5px solid #0ff;
-      border-right: 5px solid #80f;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
+    .px-loader span {
+      background: var(--sky3);
+      image-rendering: pixelated;
+      animation: pxBlink 0.9s step-end infinite;
     }
-    @keyframes spin {
-      0% { transform: rotate(0deg);}
-      100% { transform: rotate(360deg);}
+    .px-loader span:nth-child(1) { animation-delay: 0.0s; }
+    .px-loader span:nth-child(2) { animation-delay: 0.1s; }
+    .px-loader span:nth-child(3) { animation-delay: 0.2s; }
+    .px-loader span:nth-child(4) { animation-delay: 0.3s; }
+    .px-loader span:nth-child(5) { animation-delay: 0.4s; }
+    .px-loader span:nth-child(6) { animation-delay: 0.5s; }
+    .px-loader span:nth-child(7) { animation-delay: 0.6s; }
+    .px-loader span:nth-child(8) { animation-delay: 0.7s; }
+    .px-loader span:nth-child(9) { animation-delay: 0.8s; }
+    @keyframes pxBlink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.1; }
     }
-    .loadingText {
-      font-size: 20px;
-      font-weight: bold;
-      color: #0ff;
-      text-shadow: 0 0 8px #0ff, 0 0 15px #80f;
-      animation: glow 1.5s ease-in-out infinite alternate;
+    .loader-txt {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: var(--mid);
+      letter-spacing: 2px;
+      animation: blink 1s step-end infinite;
     }
-    @keyframes glow {
-      from { opacity: 0.5; }
-      to { opacity: 1; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── Pixel border mixin (box-shadow trick) ── */
+    .px-box {
+      /* 4-sided pixel border using box-shadow */
+      box-shadow:
+        /* top */
+        0 -4px 0 0 var(--sky3),
+        /* bottom */
+        0  4px 0 0 var(--sky3),
+        /* left */
+        -4px 0 0 0 var(--sky3),
+        /* right */
+         4px 0 0 0 var(--sky3),
+        /* corners */
+        -4px -4px 0 0 var(--sky3),
+         4px -4px 0 0 var(--sky3),
+        -4px  4px 0 0 var(--sky3),
+         4px  4px 0 0 var(--sky3),
+        /* outer shadow */
+         8px 8px 0 0 rgba(0,80,140,0.18);
     }
 
-    /* Background */
-    #bgImage {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: -2;
-      filter: brightness(0.6);
-    }
-
-    /* Partikel biru & ungu */
-    .particle {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      opacity: 0.6;
-      animation: floatUp 10s linear infinite;
-      z-index: -1;
-    }
-    @keyframes floatUp {
-      0% { transform: translateY(100vh) scale(0.3); opacity: 0; }
-      30% { opacity: 1; }
-      100% { transform: translateY(-20vh) scale(1); opacity: 0; }
-    }
-
-    /* Container shape */
-    .container {
-      background: rgba(0, 0, 50, 0.4);
-      backdrop-filter: blur(15px);
-      padding: 35px;
-      border-radius: 20px;
-      border: 2px solid rgb(0,123,255);
-      max-width: 420px;
-      width: 100%;
-      text-align: center;
-      z-index: 5;
+    /* ── Card ── */
+    .card {
       position: relative;
-      overflow: hidden;
-
-      opacity: 0;
-      transform: translateY(50px);
-      animation: fadeUp 1s ease forwards;
-      animation-delay: 0.3s;
-    }
-    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
-
-    /* Border glowing animasi */
-    .container::before {
-      content: "";
-      position: absolute;
-      inset: -2px;
-      border-radius: 20px;
-      padding: 2px;
-      background: linear-gradient(120deg, #00f, #0ff, #80f, #f0f, #00f);
-      background-size: 400% 400%;
-      animation: borderAnim 8s linear infinite;
-      -webkit-mask: 
-        linear-gradient(#000 0 0) content-box, 
-        linear-gradient(#000 0 0);
-      -webkit-mask-composite: xor;
-              mask-composite: exclude;
-    }
-    @keyframes borderAnim {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    h2 {
-      font-size: 26px;
-      margin-bottom: 25px;
-      font-weight: bold;
-      color: rgb(0,180,255);
-      text-shadow: 0 0 8px rgba(0,180,255,0.8);
-      opacity: 0;
-      animation: fadeIn 1s ease forwards 0.3s;
-    }
-    @keyframes fadeIn { to { opacity: 1; } }
-
-    /* Input group */
-    .form-group {
-      position: relative;
-      margin: 20px 0;
+      background: rgba(255,255,255,0.88);
+      border: 4px solid var(--sky3);
+      border-radius: 0;
+      padding: 32px 28px 24px;
+      max-width: 400px;
+      width: calc(100% - 24px);
+      box-shadow:
+        8px 8px 0 0 var(--sky2),
+        12px 12px 0 0 rgba(91,184,245,0.25);
       opacity: 0;
       transform: translateY(20px);
-      animation: fadeSlide 0.8s ease forwards;
+      animation: cardIn 0.5s steps(8) 0.2s forwards;
     }
-    .form-group:nth-child(2) { animation-delay: 0.6s; }
-    .form-group:nth-child(3) { animation-delay: 0.9s; }
-    @keyframes fadeSlide { to { opacity: 1; transform: translateY(0); } }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
-    .form-group input,
-    .form-group textarea {
-      width: 100%;
-      border: 2px solid rgba(0,123,255,0.5);
-      border-radius: 12px;
-      background: rgba(255,255,255,0.08);
-      color: #fff;
-      font-size: 16px;
-      outline: none;
-      padding: 14px 16px;
-      line-height: 1.6em;
-      text-indent: 4px;
-      box-sizing: border-box;
-      transition: 0.3s;
-    }
-    .form-group textarea {
-      resize: none;
-      height: 120px;
-      padding-top: 16px;
-    }
-    .form-group input:focus,
-    .form-group textarea:focus {
-      border-color: rgb(0,180,255);
-      box-shadow: 0 0 10px rgba(0,180,255,0.7);
-    }
-    .form-group label {
+    /* pixel corner accents */
+    .card::before, .card::after {
+      content: '';
       position: absolute;
-      left: 16px;
-      top: 14px;
-      color: #bbb;
-      font-size: 14px;
-      pointer-events: none;
-      transition: 0.3s;
+      width: 12px; height: 12px;
+      background: var(--sky3);
     }
-    .form-group label.hide {
-  opacity: 0;
-  transform: translateY(-5px);
-  transition: 0.3s ease;
-}
-    .form-group input:focus + label,
-    .form-group textarea:focus + label,
-    .form-group input.filled + label,
-    .form-group textarea.filled + label {
-      top: -12px;
-      left: 12px;
-      font-size: 12px;
-      color: rgb(0,180,255);
-      background: rgba(0,0,50,0.6);
-      padding: 0 6px;
-      border-radius: 4px;
-    }
+    .card::before { top: -4px; left: -4px; }
+    .card::after  { bottom: -4px; right: -4px; }
 
-    /* Button */
-    button {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      font-size: 18px;
-      font-weight: bold;
-      background: linear-gradient(135deg, #0080ff, #8000ff);
-      color: #fff;
-      cursor: pointer;
-      transition: 0.3s;
-      box-shadow: 0 0 15px rgba(0,123,255,0.6);
-
-      opacity: 0;
-      transform: scale(0.9);
-      animation: btnAnim 0.8s ease forwards 1.2s;
-      position: relative;
-    }
-    @keyframes btnAnim {
-      to { opacity: 1; transform: scale(1); }
-    }
-    button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 35px rgba(128,0,255,0.9);
-    }
-    /* Spinner loading */
-    .spinner {
-      border: 3px solid rgba(255,255,255,0.3);
-      border-top: 3px solid #fff;
-      border-radius: 50%;
-      width: 16px;
-      height: 16px;
-      animation: spin 0.8s linear infinite;
-      display: inline-block;
-      vertical-align: middle;
-      margin-right: 6px;
-    }
-
-    /* Modal umum */
-    .modal {
-      display: none; 
-      position: fixed; 
-      z-index: 99999; 
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(5px);
-      justify-content: center; 
-      align-items: center;
-      animation: fadeIn 0.4s ease;
-    }
-    .modal-content {
-      padding: 25px;
-      border-radius: 18px;
+    /* ── Header ── */
+    .header {
       text-align: center;
-      max-width: 350px;
-      width: 80%;
-      color: #fff;
-      animation: popUp 0.5s ease;
+      margin-bottom: 24px;
     }
-    @keyframes popUp {
-      from { transform: scale(0.7); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+
+    /* pixel icon — SVG plane */
+    .px-icon {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 12px;
+      background: var(--sky3);
+      border: 3px solid var(--dark);
+      box-shadow: 3px 3px 0 0 var(--dark);
+      line-height: 0;
     }
-    .modal-content button {
-      margin-top: 15px;
-      padding: 10px 18px;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: bold;
+    .px-icon svg { display: block; }
+
+    .header h2 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      color: var(--dark);
+      line-height: 1.8;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .header h2 span { color: var(--sky3); }
+
+    .header-sub {
+      font-family: 'VT323', monospace;
+      font-size: 17px;
+      color: var(--soft);
+      letter-spacing: 1px;
+    }
+
+    .px-divider {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 12px 0 0;
+      justify-content: center;
+    }
+    .px-divider span {
+      display: inline-block;
+      width: 8px; height: 8px;
+      background: var(--sky3);
+    }
+    .px-divider span:nth-child(2) { width: 5px; height: 5px; background: var(--sky2); }
+    .px-divider span:nth-child(3) { width: 40px; height: 3px; background: var(--sky3); }
+    .px-divider span:nth-child(4) { width: 5px; height: 5px; background: var(--sky2); }
+    .px-divider span:nth-child(5) { width: 8px; height: 8px; background: var(--sky3); }
+
+    /* ── Form ── */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .field-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 7px;
+      color: var(--mid);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .field-label svg { flex-shrink: 0; }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      background: var(--skyvlt);
+      border: 3px solid var(--sky3);
+      border-radius: 0;
+      color: var(--dark);
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      letter-spacing: 0.5px;
+      padding: 10px 12px;
+      outline: none;
+      box-shadow: 3px 3px 0 0 var(--sky2);
+      transition: border-color 0.1s, box-shadow 0.1s;
+      -webkit-appearance: none;
+    }
+    input[type="text"]::placeholder,
+    textarea::placeholder {
+      color: rgba(42,111,168,0.35);
+      font-size: 18px;
+    }
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: var(--dark);
+      box-shadow: 4px 4px 0 0 var(--dark);
+      background: #fff;
+    }
+    textarea {
+      resize: none;
+      height: 110px;
+      line-height: 1.5;
+    }
+
+    .char-hint {
+      text-align: right;
+      margin-top: 5px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 6px;
+      color: var(--soft);
+    }
+    .char-hint.warn { color: #e07820; }
+
+    /* ── Button ── */
+    .btn-send {
+      width: 100%;
+      padding: 14px 12px;
+      border: 3px solid var(--dark);
+      border-radius: 0;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--white);
+      background: var(--sky3);
       cursor: pointer;
-      transition: 0.3s;
+      box-shadow: 4px 4px 0 0 var(--dark);
+      transition: none;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      image-rendering: pixelated;
     }
-    /* Modal sukses */
-    #successModal .modal-content {
-      background: rgba(0, 0, 50, 0.9);
-      border: 2px solid #0ff;
-      box-shadow: 0 0 25px #80f;
+    .btn-send:hover {
+      background: var(--sky2);
+      box-shadow: 5px 5px 0 0 var(--dark);
+      transform: translate(-1px, -1px);
     }
-    #successModal .modal-content h3 {
-      color: #0ff;
-      text-shadow: 0 0 8px #0ff, 0 0 12px #80f;
+    .btn-send:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 0 var(--dark);
     }
-    #successModal .modal-content button {
-      background: linear-gradient(135deg, #00f, #80f);
-      color: #fff;
+    .btn-send.sending {
+      background: var(--skylt);
+      color: var(--mid);
+      pointer-events: none;
     }
-    #successModal .modal-content button:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 25px #0ff;
+
+    .px-spinner {
+      display: inline-block;
+      width: 12px; height: 12px;
+      border: 3px solid var(--mid);
+      border-top-color: transparent;
+      animation: spin 0.6s steps(8) infinite;
     }
-    /* Modal gagal */
-    #errorModal .modal-content {
-      background: rgba(50, 0, 0, 0.9);
-      border: 2px solid #f00;
-      box-shadow: 0 0 25px #f33;
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Footer ── */
+    .footer-text {
+      text-align: center;
+      margin-top: 18px;
+      font-family: 'VT323', monospace;
+      font-size: 15px;
+      color: var(--soft);
+      line-height: 1.5;
     }
-    #errorModal .modal-content h3 {
-      color: #f33;
-      text-shadow: 0 0 8px #f00, 0 0 12px #f55;
+    .footer-text strong {
+      display: block;
+      font-size: 13px;
+      color: var(--sky3);
+      margin-top: 4px;
+      letter-spacing: 1px;
     }
-    #errorModal .modal-content button {
-      background: linear-gradient(135deg, #a00, #f33);
-      color: #fff;
+
+    /* ── Modal ── */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9998;
+      background: rgba(135,206,235,0.55);
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      backdrop-filter: blur(2px);
     }
-    #errorModal .modal-content button:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 25px #f00;
+    .modal.open { display: flex; }
+
+    .modal-box {
+      background: #fff;
+      border: 4px solid var(--dark);
+      border-radius: 0;
+      padding: 28px 24px 22px;
+      max-width: 300px;
+      width: 100%;
+      text-align: center;
+      animation: pxPop 0.3s steps(6);
     }
-    /* Efek shake modal gagal */
-    .shakeModal {
-      animation: shake 0.5s;
+    @keyframes pxPop {
+      from { transform: scale(0.7); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
     }
+
+    .modal-icon-box {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px; height: 48px;
+      border: 3px solid var(--dark);
+      margin-bottom: 14px;
+      box-shadow: 3px 3px 0 0 var(--dark);
+    }
+    .modal-box h3 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      line-height: 1.8;
+      margin-bottom: 10px;
+    }
+    .modal-box p {
+      font-family: 'VT323', monospace;
+      font-size: 17px;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+    .modal-btn {
+      width: 100%;
+      padding: 12px;
+      border: 3px solid var(--dark);
+      border-radius: 0;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 3px 3px 0 0 var(--dark);
+    }
+    .modal-btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 0 var(--dark); }
+
+    /* success */
+    #successModal .modal-box { border-color: var(--sky3); box-shadow: 6px 6px 0 0 var(--sky3); }
+    #successModal .modal-icon-box { background: var(--skylt); border-color: var(--sky3); box-shadow: 3px 3px 0 0 var(--sky3); }
+    #successModal h3 { color: var(--mid); }
+    #successModal p  { color: var(--soft); }
+    #successModal .modal-btn { background: var(--sky3); color: #fff; border-color: var(--dark); }
+    #successModal .modal-btn:hover { background: var(--sky2); }
+
+    /* error */
+    #errorModal .modal-box { border-color: #c0392b; box-shadow: 6px 6px 0 0 #c0392b; }
+    #errorModal .modal-icon-box { background: #fde8e8; border-color: #c0392b; box-shadow: 3px 3px 0 0 #c0392b; }
+    #errorModal h3 { color: #c0392b; }
+    #errorModal p  { color: #e05a4e; }
+    #errorModal .modal-btn { background: #e05a4e; color: #fff; border-color: #c0392b; }
+    #errorModal .modal-btn:hover { background: #c0392b; }
+
+    .shake { animation: shake 0.4s steps(4) !important; }
     @keyframes shake {
-      0% { transform: translateX(0); }
-      25% { transform: translateX(-8px); }
-      50% { transform: translateX(8px); }
-      75% { transform: translateX(-8px); }
-      100% { transform: translateX(0); }
+      0%,100% { transform: translateX(0); }
+      25%      { transform: translateX(-6px); }
+      75%      { transform: translateX(6px); }
     }
   </style>
 </head>
 <body>
 
-  <!-- Loading screen -->
+  <div class="bg-img"></div>
+  <div class="bg-overlay"></div>
+
+  <!-- pixel clouds -->
+  <div id="clouds"></div>
+
+  <!-- Loading -->
   <div id="loadingScreen">
-    <div class="loader"></div>
-    <div class="loadingText">Loading...</div>
+    <div class="px-loader">
+      <span></span><span></span><span></span>
+      <span></span><span></span><span></span>
+      <span></span><span></span><span></span>
+    </div>
+    <div class="loader-txt">LOADING...</div>
   </div>
 
-  <!-- Background -->
-  <img id="bgImage" src="bg.jpg" alt="background">
-
-  <!-- Partikel -->
-  <script>
-    for(let i=0;i<35;i++){
-      let p=document.createElement("div");
-      p.className="particle";
-      let warna = Math.random() > 0.5 ? "rgba(0,150,255,0.9)" : "rgba(180,0,255,0.9)";
-      p.style.background=warna;
-      p.style.boxShadow="0 0 12px "+warna;
-      p.style.left=Math.random()*100+"vw";
-      p.style.animationDuration= (6+Math.random()*10)+"s";
-      p.style.animationDelay= (Math.random()*5)+"s";
-      document.body.appendChild(p);
-    }
-  </script>
-
-  <div class="container" id="mainContent" style="display:none;">
-    <h2>⚡ KIRIM PESAN ANONIM ⚡</h2>
-    
-    <div class="form-group">
-      <input type="text" id="nama">
-      <label for="nama" id="labelNama"></label>
-    </div>
-
-    <div class="form-group">
-      <textarea id="pesan"></textarea>
-      <label for="pesan" id="labelPesan"></label>
-    </div>
-
-    <button onclick="kirimPesan()" id="btnKirim">🚀 KIRIM SEKARANG</button>
-    
-    <p class="footerText">"Allah's plane are better than your dreams and in every situation,just say Alhamdulillah"</p>
-    <h4>-Zero KW</h4>
-  </div>
-  
-  <!-- Modal sukses -->
+  <!-- Success Modal -->
   <div id="successModal" class="modal">
-    <div class="modal-content">
-      <h3>✅ Pesan Terkirim!</h3>
-      <p>Pesan lo udah nyampe bro 🚀</p>
-      <button onclick="closeModal('successModal')">Tutup</button>
+    <div class="modal-box">
+      <div class="modal-icon-box">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M5 13l4 4L19 7" stroke="#3AA0E8" stroke-width="3" stroke-linecap="square"/>
+        </svg>
+      </div>
+      <h3>PESAN<br>TERKIRIM!</h3>
+      <p>Pesanmu udah nyampe bro!</p>
+      <button class="modal-btn" onclick="closeModal('successModal')">[ TUTUP ]</button>
     </div>
   </div>
 
-  <!-- Modal gagal -->
+  <!-- Error Modal -->
   <div id="errorModal" class="modal">
-    <div class="modal-content" id="errorContent">
-      <h3>❌ Gagal Ngirim!</h3>
-      <p>Ada masalah, coba lagi nanti ⚠️</p>
-      <button onclick="closeModal('errorModal')">Tutup</button>
+    <div class="modal-box" id="errorBox">
+      <div class="modal-icon-box">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M6 6l12 12M18 6L6 18" stroke="#c0392b" stroke-width="3" stroke-linecap="square"/>
+        </svg>
+      </div>
+      <h3>GAGAL<br>KIRIM!</h3>
+      <p id="errorMsg">Ada masalah, coba lagi.</p>
+      <button class="modal-btn" onclick="closeModal('errorModal')">[ COBA LAGI ]</button>
     </div>
   </div>
 
-  <!-- Suara -->
-  <audio id="sClick" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
-  <audio id="sSuccess" src="https://assets.mixkit.co/active_storage/sfx/2011/2011-preview.mp3"></audio>
-  <audio id="sError" src="https://assets.mixkit.co/active_storage/sfx/2012/2012-preview.mp3"></audio>
-  <audio id="sHover" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
-  <audio id="sIntro" src="https://assets.mixkit.co/active_storage/sfx/2866/2866-preview.mp3"></audio>
+  <!-- iframe trick -->
+  <iframe id="tgFrame" name="tgFrame" style="display:none;"></iframe>
+
+  <!-- Main Card -->
+  <div class="card" id="mainContent" style="display:none;">
+    <div class="header">
+      <div class="px-icon">
+        <!-- pixel paper plane SVG -->
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2"  y="12" width="4"  height="4" fill="white"/>
+          <rect x="6"  y="10" width="4"  height="4" fill="white"/>
+          <rect x="6"  y="14" width="4"  height="4" fill="white"/>
+          <rect x="10" y="8"  width="4"  height="4" fill="white"/>
+          <rect x="10" y="12" width="4"  height="4" fill="white"/>
+          <rect x="10" y="16" width="4"  height="4" fill="white"/>
+          <rect x="14" y="6"  width="4"  height="4" fill="white"/>
+          <rect x="14" y="14" width="4"  height="4" fill="white"/>
+          <rect x="18" y="4"  width="4"  height="4" fill="white"/>
+          <rect x="18" y="18" width="4"  height="4" fill="white"/>
+          <rect x="22" y="2"  width="4"  height="4" fill="white"/>
+          <rect x="22" y="22" width="4"  height="4" fill="white"/>
+        </svg>
+      </div>
+      <h2>KIRIM <span>ANONIM</span></h2>
+      <div class="header-sub">Pesanmu aman &amp; rahasia</div>
+      <div class="px-divider">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="field-label" for="nama">
+        <!-- pixel user icon -->
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <rect x="4" y="1" width="4" height="4" fill="#3AA0E8"/>
+          <rect x="2" y="7" width="8" height="4" fill="#3AA0E8"/>
+        </svg>
+        NAMA (OPSIONAL)
+      </label>
+      <input type="text" id="nama" placeholder="Nama kamu..." maxlength="50">
+    </div>
+
+    <div class="form-group">
+      <label class="field-label" for="pesan">
+        <!-- pixel message icon -->
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <rect x="1" y="1" width="10" height="7" fill="#3AA0E8"/>
+          <rect x="3" y="8" width="2"  height="2" fill="#3AA0E8"/>
+          <rect x="1" y="3" width="10" height="1" fill="white" opacity="0.4"/>
+          <rect x="1" y="5" width="7"  height="1" fill="white" opacity="0.4"/>
+        </svg>
+        PESAN
+      </label>
+      <textarea id="pesan" placeholder="Tulis pesanmu di sini..." maxlength="500" oninput="updateChar()"></textarea>
+      <div class="char-hint" id="charHint">0 / 500</div>
+    </div>
+
+    <button class="btn-send" id="btnSend" onclick="kirimPesan()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <rect x="0" y="6" width="3" height="2" fill="white"/>
+        <rect x="3" y="4" width="3" height="2" fill="white"/>
+        <rect x="3" y="8" width="3" height="2" fill="white"/>
+        <rect x="6" y="2" width="3" height="2" fill="white"/>
+        <rect x="6" y="10" width="3" height="2" fill="white"/>
+        <rect x="9" y="0" width="3" height="2" fill="white"/>
+        <rect x="9" y="12" width="3" height="2" fill="white"/>
+      </svg>
+      <span id="btnTxt">KIRIM SEKARANG</span>
+    </button>
+
+    <div class="footer-text">
+      "Allah's plans are better than your dreams"
+      <br>just say Alhamdulillah
+      <strong>drnalvrprtma</strong>
+    </div>
+  </div>
 
   <script>
-    const BOT_TOKEN = "7333991546:AAGOJ-qm-520_4FyZX1TV1b_7H3L9dzXyGI"; 
-    const CHAT_ID = "7378003525"; 
-    const btn = document.getElementById("btnKirim");
+    const BOT_TOKEN = "7333991546:AAGOJ-qm-520_4FyZX1TV1b_7H3L9dzXyGI";
+    const CHAT_ID   = "7378003525";
 
-    const sClick = document.getElementById("sClick");
-    const sSuccess = document.getElementById("sSuccess");
-    const sError = document.getElementById("sError");
-    const sHover = document.getElementById("sHover");
-    const sIntro = document.getElementById("sIntro");
+    /* ── Pixel clouds ── */
+    const cloudShapes = [
+      [[1,0,1,0],[1,1,1,1],[1,1,1,1]],
+      [[0,1,1,0],[1,1,1,1],[1,1,1,1]],
+      [[1,1,0,0],[1,1,1,1],[1,1,1,1]]
+    ];
+    const PX = 10;
+    const cloudCount = 5;
+    for (let c = 0; c < cloudCount; c++) {
+      const shape = cloudShapes[c % cloudShapes.length];
+      const canvas = document.createElement('canvas');
+      const cols = shape[0].length, rows = shape.length;
+      canvas.width  = cols * PX;
+      canvas.height = rows * PX;
+      canvas.style.cssText = 'position:fixed; image-rendering:pixelated;';
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      shape.forEach((row, ry) =>
+        row.forEach((px, rx) => { if(px) ctx.fillRect(rx*PX, ry*PX, PX, PX); })
+      );
+      const top  = 5  + Math.random() * 40;
+      const dur  = 18 + Math.random() * 22;
+      const delay= -Math.random() * dur;
+      const scale= 2 + Math.random() * 3;
+      canvas.className = 'cloud';
+      canvas.style.top = top + '%';
+      canvas.style.zIndex = '-1';
+      canvas.style.transform = `scale(${scale})`;
+      canvas.style.transformOrigin = 'left top';
+      canvas.style.animationDuration  = dur + 's';
+      canvas.style.animationDelay     = delay + 's';
+      document.body.appendChild(canvas);
+    }
 
-    // loading screen
-    window.addEventListener("load", ()=>{
-      setTimeout(()=>{
-        document.getElementById("loadingScreen").classList.add("hide");
-        setTimeout(()=>{
-          document.getElementById("loadingScreen").style.display="none";
-          document.getElementById("mainContent").style.display="block";
-          sIntro.play();
-        }, 1000);
-      }, 1500);
+    /* ── Loading ── */
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const ls = document.getElementById('loadingScreen');
+        ls.classList.add('hide');
+        setTimeout(() => {
+          ls.style.display = 'none';
+          document.getElementById('mainContent').style.display = 'block';
+        }, 500);
+      }, 1400);
     });
 
-    // typing effect label
-    function typingEffect(el, text, speed){
-      let i=0;
-      function type(){
-        if(i<text.length){
-          el.innerHTML+=text.charAt(i);
-          i++;
-          setTimeout(type,speed);
-        }
-      }
-      type();
+    /* ── Char counter ── */
+    function updateChar() {
+      const len = document.getElementById('pesan').value.length;
+      const el  = document.getElementById('charHint');
+      el.textContent = len + ' / 500';
+      el.classList.toggle('warn', len > 420);
     }
-    typingEffect(document.getElementById("labelNama"), "", 40);
-    typingEffect(document.getElementById("labelPesan"), "", 40);
-    // typing effect label
-function typingEffect(el, text, speed){
-  let i=0;
-  function type(){
-    if(i<text.length){
-      el.innerHTML+=text.charAt(i);
-      i++;
-      setTimeout(type,speed);
-    }
-  }
-  type();
-}
-typingEffect(document.getElementById("labelNama"), "Nama lo (opsional)", 40);
-typingEffect(document.getElementById("labelPesan"), "Tulis pesan lo di sini...", 40);
 
-// hide label saat user ngetik
-document.querySelectorAll(".form-group input, .form-group textarea").forEach(el=>{
-  el.addEventListener("input",()=>{
-    let label = el.nextElementSibling;
-    if(el.value.trim() !== ""){
-      label.classList.add("hide");
-    } else {
-      label.classList.remove("hide");
-    }
-  });
-});
-    // hover sound
-    btn.addEventListener("mouseenter", ()=>{ sHover.play(); });
-
-    // modal
+    /* ── Modal ── */
     function openModal(id) {
-      document.getElementById(id).style.display = "flex";
-      if(id === "errorModal"){
-        const errorBox = document.getElementById("errorContent");
-        errorBox.classList.add("shakeModal");
-        setTimeout(()=> errorBox.classList.remove("shakeModal"),600);
+      document.getElementById(id).classList.add('open');
+      if (id === 'errorModal') {
+        const b = document.getElementById('errorBox');
+        b.classList.remove('shake');
+        void b.offsetWidth;
+        b.classList.add('shake');
       }
     }
     function closeModal(id) {
-      document.getElementById(id).style.display = "none";
+      document.getElementById(id).classList.remove('open');
     }
 
+    /* ── Kirim ── */
     function kirimPesan() {
-      const nama = document.getElementById("nama").value.trim();
-      const pesan = document.getElementById("pesan").value.trim();
+      const nama  = document.getElementById('nama').value.trim();
+      const pesan = document.getElementById('pesan').value.trim();
+      const btn   = document.getElementById('btnSend');
 
       if (!pesan) {
-        sError.play();
-        openModal("errorModal");
+        document.getElementById('errorMsg').textContent = 'Pesan tidak boleh kosong!';
+        openModal('errorModal');
         return;
       }
 
-      sClick.play();
-      btn.innerHTML = '<span class="spinner"></span>Ngirim...';
-      const teks = `💬 Pesan Anonim:\n\n📨 ${pesan}\n👤 Dari: ${nama || "Anonim"}`;
+      btn.classList.add('sending');
+      document.getElementById('btnTxt').textContent = 'MENGIRIM...';
 
-      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: CHAT_ID, text: teks })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.ok) {
-          sSuccess.play();
-          document.getElementById("pesan").value = "";
-          document.getElementById("nama").value = "";
-          openModal("successModal");
-        } else {
-          sError.play();
-          openModal("errorModal");
-        }
-        btn.innerText = "🚀 KIRIM SEKARANG";
-      })
-      .catch(() => {
-        sError.play();
-        openModal("errorModal");
-        btn.innerText = "🚀 KIRIM SEKARANG";
-      });
+      const teks = 'Pesan Anonim:\n\nPesan: ' + pesan + '\nDari: ' + (nama || 'Anonim');
+      const url  = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage'
+                 + '?chat_id=' + encodeURIComponent(CHAT_ID)
+                 + '&text='    + encodeURIComponent(teks);
+
+      function resetBtn() {
+        btn.classList.remove('sending');
+        document.getElementById('btnTxt').textContent = 'KIRIM SEKARANG';
+      }
+      function onSuccess() {
+        document.getElementById('pesan').value = '';
+        document.getElementById('nama').value  = '';
+        updateChar();
+        openModal('successModal');
+      }
+      function onError(msg) {
+        document.getElementById('errorMsg').textContent = msg || 'Ada masalah, coba lagi.';
+        openModal('errorModal');
+      }
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      xhr.timeout = 12000;
+      xhr.onload = function() {
+        resetBtn();
+        try {
+          const d = JSON.parse(xhr.responseText);
+          if (d.ok) { onSuccess(); }
+          else { onError(d.description || 'Telegram error.'); }
+        } catch(e) { onError('Respons tidak valid.'); }
+      };
+      xhr.onerror = function() {
+        resetBtn();
+        /* fallback: iframe form */
+        const form = document.createElement('form');
+        form.method = 'GET';
+        form.action = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage';
+        form.target = 'tgFrame';
+        [['chat_id', CHAT_ID], ['text', teks]].forEach(([k,v]) => {
+          const i = document.createElement('input');
+          i.type = 'hidden'; i.name = k; i.value = v;
+          form.appendChild(i);
+        });
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+        setTimeout(onSuccess, 2000);
+      };
+      xhr.ontimeout = function() {
+        resetBtn();
+        onError('Koneksi timeout, coba lagi.');
+      };
+      xhr.send();
     }
   </script>
-
 </body>
 </html>
+
