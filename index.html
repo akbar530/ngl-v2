@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DEREN NGL</title>
+  <title>Kirim Pesan Anonim</title>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -237,6 +237,11 @@
     }
     .field-label svg { flex-shrink: 0; }
 
+    input[type="file"] {
+      all: unset;
+      display: none;
+    }
+
     input[type="text"],
     textarea {
       width: 100%;
@@ -281,7 +286,6 @@
 
     /* ── Photo Upload ── */
     .upload-zone {
-      position: relative;
       border: 3px dashed var(--sky3);
       background: var(--skyvlt);
       padding: 16px 12px;
@@ -289,11 +293,10 @@
       cursor: pointer;
       box-shadow: 3px 3px 0 0 var(--sky2);
       transition: background 0.1s, border-color 0.1s;
+      user-select: none;
+      -webkit-user-select: none;
     }
-    .upload-zone:hover, .upload-zone.drag { background: rgba(58,160,232,0.08); border-color: var(--dark); }
-    .upload-zone input[type="file"] {
-      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
-    }
+    .upload-zone:hover, .upload-zone:active { background: rgba(58,160,232,0.08); border-color: var(--dark); }
     .upload-label {
       display: flex; flex-direction: column; align-items: center; gap: 8px;
       pointer-events: none;
@@ -605,8 +608,11 @@
         </svg>
         FOTO (OPSIONAL)
       </label>
-      <div class="upload-zone" id="uploadZone">
-        <input type="file" id="fotoInput" accept="image/*" onchange="handlePhoto(this)">
+      <!-- input file tersembunyi, dipanggil lewat JS -->
+      <input type="file" id="fotoInput" accept="image/*" style="display:none" onchange="handlePhoto(this)">
+
+      <!-- zona klik — bukan label, tapi div+onclick -->
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fotoInput').click()">
         <div class="upload-label" id="uploadLabel">
           <svg width="28" height="24" viewBox="0 0 28 24" fill="none">
             <rect x="1"  y="6"  width="26" height="17" fill="#C8E9F8" stroke="#3AA0E8" stroke-width="2"/>
@@ -621,6 +627,8 @@
           <span class="upload-label-sub">JPG / PNG / WEBP &bull; MAX 10MB</span>
         </div>
       </div>
+
+      <!-- preview muncul setelah foto dipilih -->
       <div class="photo-preview-wrap" id="previewWrap">
         <img id="photoPreview" class="photo-preview" src="" alt="preview">
         <button class="photo-remove" onclick="removePhoto()" type="button">X</button>
@@ -643,7 +651,7 @@
     <div class="footer-text">
       "Allah's plans are better than your dreams"
       <br>just say Alhamdulillah
-      <strong>drnalvrprtma</strong>
+      <strong>— Zero KW</strong>
     </div>
   </div>
 
@@ -651,151 +659,161 @@
     const BOT_TOKEN = "7333991546:AAGOJ-qm-520_4FyZX1TV1b_7H3L9dzXyGI";
     const CHAT_ID   = "7378003525";
 
-    /* ── Pixel clouds ── */
-    const cloudShapes = [
-      [[1,0,1,0],[1,1,1,1],[1,1,1,1]],
-      [[0,1,1,0],[1,1,1,1],[1,1,1,1]],
-      [[1,1,0,0],[1,1,1,1],[1,1,1,1]]
-    ];
+    /* Pixel clouds */
+    const cloudShapes = [[[1,0,1,0],[1,1,1,1],[1,1,1,1]],[[0,1,1,0],[1,1,1,1],[1,1,1,1]],[[1,1,0,0],[1,1,1,1],[1,1,1,1]]];
     const PX = 10;
-    const cloudCount = 5;
-    for (let c = 0; c < cloudCount; c++) {
-      const shape = cloudShapes[c % cloudShapes.length];
-      const canvas = document.createElement('canvas');
-      const cols = shape[0].length, rows = shape.length;
-      canvas.width  = cols * PX;
-      canvas.height = rows * PX;
-      canvas.style.cssText = 'position:fixed; image-rendering:pixelated;';
-      const ctx = canvas.getContext('2d');
+    for (let c = 0; c < 5; c++) {
+      const shape = cloudShapes[c % 3];
+      const cv = document.createElement('canvas');
+      cv.width = shape[0].length*PX; cv.height = shape.length*PX;
+      cv.style.cssText = 'position:fixed;image-rendering:pixelated;';
+      const ctx = cv.getContext('2d');
       ctx.fillStyle = 'rgba(255,255,255,0.9)';
-      shape.forEach((row, ry) =>
-        row.forEach((px, rx) => { if(px) ctx.fillRect(rx*PX, ry*PX, PX, PX); })
-      );
-      const top  = 5  + Math.random() * 40;
-      const dur  = 18 + Math.random() * 22;
-      const delay= -Math.random() * dur;
-      const scale= 2 + Math.random() * 3;
-      canvas.className = 'cloud';
-      canvas.style.top = top + '%';
-      canvas.style.zIndex = '-1';
-      canvas.style.transform = `scale(${scale})`;
-      canvas.style.transformOrigin = 'left top';
-      canvas.style.animationDuration  = dur + 's';
-      canvas.style.animationDelay     = delay + 's';
-      document.body.appendChild(canvas);
+      shape.forEach((row,ry) => row.forEach((px,rx) => { if(px) ctx.fillRect(rx*PX,ry*PX,PX,PX); }));
+      cv.className = 'cloud';
+      const dur = 18+Math.random()*22;
+      cv.style.top = (5+Math.random()*40)+'%'; cv.style.zIndex='-1';
+      cv.style.transform = `scale(${2+Math.random()*3})`; cv.style.transformOrigin='left top';
+      cv.style.animationDuration=dur+'s'; cv.style.animationDelay=(-Math.random()*dur)+'s';
+      document.body.appendChild(cv);
     }
 
-    /* ── Loading ── */
+    /* Loading */
     window.addEventListener('load', () => {
       setTimeout(() => {
         const ls = document.getElementById('loadingScreen');
         ls.classList.add('hide');
-        setTimeout(() => {
-          ls.style.display = 'none';
-          document.getElementById('mainContent').style.display = 'block';
-        }, 500);
+        setTimeout(() => { ls.style.display='none'; document.getElementById('mainContent').style.display='block'; }, 500);
       }, 1400);
     });
 
-    /* ── Char counter ── */
+    /* Char counter */
     function updateChar() {
       const len = document.getElementById('pesan').value.length;
       const el  = document.getElementById('charHint');
-      el.textContent = len + ' / 500';
-      el.classList.toggle('warn', len > 420);
+      el.textContent = len+' / 500';
+      el.classList.toggle('warn', len>420);
     }
 
-    /* ── Modal ── */
+    /* Modal */
     function openModal(id) {
       document.getElementById(id).classList.add('open');
-      if (id === 'errorModal') {
-        const b = document.getElementById('errorBox');
-        b.classList.remove('shake');
-        void b.offsetWidth;
-        b.classList.add('shake');
+      if (id==='errorModal') {
+        const b=document.getElementById('errorBox');
+        b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake');
       }
     }
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('open');
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    /* Photo handlers */
+    let selectedPhoto = null;
+    function handlePhoto(input) {
+      const file = input.files[0];
+      if (!file) return;
+      if (file.size > 10*1024*1024) {
+        document.getElementById('errorMsg').textContent = 'Foto terlalu besar! Maks 10MB.';
+        openModal('errorModal'); input.value=''; return;
+      }
+      selectedPhoto = file;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('photoPreview').src = e.target.result;
+        document.getElementById('previewWrap').classList.add('show');
+        document.getElementById('uploadLabel').style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+    function removePhoto() {
+      selectedPhoto = null;
+      document.getElementById('fotoInput').value = '';
+      document.getElementById('photoPreview').src = '';
+      document.getElementById('previewWrap').classList.remove('show');
+      document.getElementById('uploadLabel').style.display = 'flex';
     }
 
-    /* ── Kirim ── */
+    /* Kirim */
     function kirimPesan() {
       const nama  = document.getElementById('nama').value.trim();
       const pesan = document.getElementById('pesan').value.trim();
       const btn   = document.getElementById('btnSend');
 
-      if (!pesan) {
-        document.getElementById('errorMsg').textContent = 'Pesan tidak boleh kosong!';
-        openModal('errorModal');
-        return;
+      if (!pesan && !selectedPhoto) {
+        document.getElementById('errorMsg').textContent = 'Tulis pesan atau pilih foto dulu!';
+        openModal('errorModal'); return;
       }
 
       btn.classList.add('sending');
       document.getElementById('btnTxt').textContent = 'MENGIRIM...';
 
-      const now  = new Date();
-      const jam  = now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
-      const tgl  = now.toLocaleDateString('id-ID', {day:'2-digit', month:'long', year:'numeric'});
-      const teks = '💌 *PESAN ANONIM*\n'
-                 + '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n'
-                 + '📝 ' + pesan + '\n\n'
-                 + '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n'
-                 + '👤 Dari   : *' + (nama || 'Anonim') + '*\n'
-                 + '🕐 Waktu : ' + jam + ' \u2022 ' + tgl;
-      const url  = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage'
-                 + '?chat_id='    + encodeURIComponent(CHAT_ID)
-                 + '&text='       + encodeURIComponent(teks)
-                 + '&parse_mode=' + encodeURIComponent('Markdown');
+      const now = new Date();
+      const jam = now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+      const tgl = now.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+      const bar = '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501';
+      const caption = '\uD83D\uDC8C *PESAN ANONIM*\n'
+                    + bar + '\n\n'
+                    + (pesan ? '\uD83D\uDCDD ' + pesan + '\n\n' : '')
+                    + bar + '\n'
+                    + '\uD83D\uDC64 Dari   : *' + (nama || 'Anonim') + '*\n'
+                    + '\uD83D\uDD50 Waktu : ' + jam + ' \u2022 ' + tgl;
 
       function resetBtn() {
         btn.classList.remove('sending');
         document.getElementById('btnTxt').textContent = 'KIRIM SEKARANG';
       }
       function onSuccess() {
-        document.getElementById('pesan').value = '';
-        document.getElementById('nama').value  = '';
-        updateChar();
-        openModal('successModal');
+        document.getElementById('pesan').value='';
+        document.getElementById('nama').value='';
+        updateChar(); removePhoto(); openModal('successModal');
       }
       function onError(msg) {
         document.getElementById('errorMsg').textContent = msg || 'Ada masalah, coba lagi.';
         openModal('errorModal');
       }
 
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', url, true);
-      xhr.timeout = 12000;
-      xhr.onload = function() {
-        resetBtn();
-        try {
-          const d = JSON.parse(xhr.responseText);
-          if (d.ok) { onSuccess(); }
-          else { onError(d.description || 'Telegram error.'); }
-        } catch(e) { onError('Respons tidak valid.'); }
-      };
-      xhr.onerror = function() {
-        resetBtn();
-        /* fallback: iframe form */
-        const form = document.createElement('form');
-        form.method = 'GET';
-        form.action = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage';
-        form.target = 'tgFrame';
-        [['chat_id', CHAT_ID], ['text', teks]].forEach(([k,v]) => {
-          const i = document.createElement('input');
-          i.type = 'hidden'; i.name = k; i.value = v;
-          form.appendChild(i);
-        });
-        document.body.appendChild(form);
-        form.submit();
-        document.body.removeChild(form);
-        setTimeout(onSuccess, 2000);
-      };
-      xhr.ontimeout = function() {
-        resetBtn();
-        onError('Koneksi timeout, coba lagi.');
-      };
-      xhr.send();
+      if (selectedPhoto) {
+        /* sendPhoto — foto + caption nyatu dalam 1 bubble Telegram */
+        const fd = new FormData();
+        fd.append('chat_id',    CHAT_ID);
+        fd.append('photo',      selectedPhoto, selectedPhoto.name);
+        fd.append('caption',    caption);
+        fd.append('parse_mode', 'Markdown');
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'https://api.telegram.org/bot'+BOT_TOKEN+'/sendPhoto', true);
+        xhr.timeout = 30000;
+        xhr.onload = function() {
+          resetBtn();
+          try {
+            const d = JSON.parse(xhr.responseText);
+            if (d.ok) { onSuccess(); }
+            else { onError('Error: '+(d.description||'Telegram error')); }
+          } catch(e) { onError('Respons tidak valid.'); }
+        };
+        xhr.onerror   = function() { resetBtn(); onError('Gagal kirim foto, cek koneksi.'); };
+        xhr.ontimeout = function() { resetBtn(); onError('Timeout, coba lagi.'); };
+        xhr.send(fd);
+
+      } else {
+        /* sendMessage saja */
+        const url = 'https://api.telegram.org/bot'+BOT_TOKEN+'/sendMessage'
+                  + '?chat_id='   +encodeURIComponent(CHAT_ID)
+                  + '&text='      +encodeURIComponent(caption)
+                  + '&parse_mode='+encodeURIComponent('Markdown');
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.timeout = 12000;
+        xhr.onload = function() {
+          resetBtn();
+          try {
+            const d = JSON.parse(xhr.responseText);
+            if (d.ok) { onSuccess(); }
+            else { onError(d.description||'Telegram error.'); }
+          } catch(e) { onError('Respons tidak valid.'); }
+        };
+        xhr.onerror   = function() { resetBtn(); onError('Gagal kirim, cek koneksi.'); };
+        xhr.ontimeout = function() { resetBtn(); onError('Timeout, coba lagi.'); };
+        xhr.send();
+      }
     }
   </script>
 </body>
