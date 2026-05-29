@@ -548,7 +548,7 @@
     <div class="footer-text">
       "Allah's plans are better than your dreams"
       <br>just say Alhamdulillah
-      <strong>drnalvrprtma</strong>
+      <strong>denalvrprtma</strong>
     </div>
   </div>
 
@@ -639,10 +639,19 @@
       btn.classList.add('sending');
       document.getElementById('btnTxt').textContent = 'MENGIRIM...';
 
-      const teks = 'Pesan Anonim:\n\nPesan: ' + pesan + '\nDari: ' + (nama || 'Anonim');
+      const now  = new Date();
+      const jam  = now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+      const tgl  = now.toLocaleDateString('id-ID', {day:'2-digit', month:'long', year:'numeric'});
+      const teks = '💌 *PESAN ANONIM*\n'
+                 + '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n'
+                 + '📝 ' + pesan + '\n\n'
+                 + '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n'
+                 + '👤 Dari   : *' + (nama || 'Anonim') + '*\n'
+                 + '🕐 Waktu : ' + jam + ' \u2022 ' + tgl;
       const url  = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage'
-                 + '?chat_id=' + encodeURIComponent(CHAT_ID)
-                 + '&text='    + encodeURIComponent(teks);
+                 + '?chat_id='    + encodeURIComponent(CHAT_ID)
+                 + '&text='       + encodeURIComponent(teks)
+                 + '&parse_mode=' + encodeURIComponent('Markdown');
 
       function resetBtn() {
         btn.classList.remove('sending');
