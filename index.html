@@ -279,6 +279,67 @@
     }
     .char-hint.warn { color: #e07820; }
 
+    /* ── Photo Upload ── */
+    .upload-zone {
+      position: relative;
+      border: 3px dashed var(--sky3);
+      background: var(--skyvlt);
+      padding: 16px 12px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 3px 3px 0 0 var(--sky2);
+      transition: background 0.1s, border-color 0.1s;
+    }
+    .upload-zone:hover, .upload-zone.drag { background: rgba(58,160,232,0.08); border-color: var(--dark); }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-label {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      pointer-events: none;
+    }
+    .upload-label svg { display: block; }
+    .upload-label-txt {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--soft);
+      line-height: 1.3;
+    }
+    .upload-label-sub {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 6px;
+      color: rgba(91,170,219,0.6);
+    }
+    /* preview */
+    .photo-preview-wrap {
+      display: none;
+      position: relative;
+      margin-top: 8px;
+    }
+    .photo-preview-wrap.show { display: block; }
+    .photo-preview {
+      width: 100%;
+      max-height: 160px;
+      object-fit: cover;
+      border: 3px solid var(--sky3);
+      display: block;
+      image-rendering: pixelated;
+    }
+    .photo-remove {
+      position: absolute;
+      top: -8px; right: -8px;
+      width: 24px; height: 24px;
+      background: #e05a4e;
+      border: 2px solid var(--dark);
+      color: white;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 2px 2px 0 0 var(--dark);
+    }
+    .photo-remove:hover { background: #c0392b; }
+
     /* ── Button ── */
     .btn-send {
       width: 100%;
@@ -530,6 +591,40 @@
       </label>
       <textarea id="pesan" placeholder="Tulis pesanmu di sini..." maxlength="500" oninput="updateChar()"></textarea>
       <div class="char-hint" id="charHint">0 / 500</div>
+    </div>
+
+    <div class="form-group">
+      <label class="field-label">
+        <!-- pixel image icon -->
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <rect x="1" y="2" width="10" height="8" fill="#3AA0E8"/>
+          <rect x="2" y="3" width="2"  height="2" fill="white"/>
+          <rect x="1" y="7" width="3"  height="3" fill="#5BB8F5"/>
+          <rect x="4" y="6" width="3"  height="4" fill="#87CEEB"/>
+          <rect x="7" y="5" width="4"  height="5" fill="#3AA0E8"/>
+        </svg>
+        FOTO (OPSIONAL)
+      </label>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fotoInput" accept="image/*" onchange="handlePhoto(this)">
+        <div class="upload-label" id="uploadLabel">
+          <svg width="28" height="24" viewBox="0 0 28 24" fill="none">
+            <rect x="1"  y="6"  width="26" height="17" fill="#C8E9F8" stroke="#3AA0E8" stroke-width="2"/>
+            <rect x="5"  y="9"  width="4"  height="4"  fill="#3AA0E8"/>
+            <rect x="7"  y="14" width="4"  height="6"  fill="#5BB8F5"/>
+            <rect x="11" y="12" width="5"  height="8"  fill="#87CEEB"/>
+            <rect x="16" y="10" width="6"  height="10" fill="#3AA0E8"/>
+            <rect x="11" y="1"  width="2"  height="6"  fill="#3AA0E8"/>
+            <rect x="9"  y="3"  width="6"  height="2"  fill="#3AA0E8"/>
+          </svg>
+          <span class="upload-label-txt">Tap untuk pilih foto</span>
+          <span class="upload-label-sub">JPG / PNG / WEBP &bull; MAX 10MB</span>
+        </div>
+      </div>
+      <div class="photo-preview-wrap" id="previewWrap">
+        <img id="photoPreview" class="photo-preview" src="" alt="preview">
+        <button class="photo-remove" onclick="removePhoto()" type="button">X</button>
+      </div>
     </div>
 
     <button class="btn-send" id="btnSend" onclick="kirimPesan()">
